@@ -15,6 +15,17 @@ books = [
     Book(3, "Fictional Book Title", "A fantasy novel set in an imaginary world.")
 ] 
 
+@books_bp.route("/<book_id>", methods=["GET"])
+def specific_book(book_id):
+    book_id = int(book_id)
+    for book in books:
+        if book.id == book_id:
+            return {
+                "id": book.id,
+                "title": book.title,
+                "description": book.description
+                    }
+
 @books_bp.route("", methods=["GET"])
 def books_list():
     books_list = []
