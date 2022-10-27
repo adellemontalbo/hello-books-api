@@ -1,49 +1,26 @@
-from flask import Blueprint, jsonify, abort, make_response
+from app import db
+from app.models.book import Book
+from flask import Blueprint, jsonify, make_response, request
+
 
 books_bp = Blueprint("books", __name__, url_prefix="/books")
 
-# class Book:
-#     def __init__(self, id, title, description):
-#         self.id = id
-#         self.title = title
-#         self.description = description
+'''
+For a little more flexibility, we could choose to use "/" as the route path and include the keyword argument strict_slashes=False. This tells the route to treat a URI the same whether or not it ends in /. Accepting either variation can make using our API a little easier for our clients.
+'''
 
-# books = [
-#     Book(1, "Book 1", "A fantasy novel set in an imaginary world."),
-#     Book(2, "Book 2", "A fantasy novel set in an imaginary world."),
-#     Book(3, "Book 3", "A fantasy novel set in an imaginary world.")
-# ] 
-
-# def validate_book(book_id):
-#     try:
-#         book_id = int(book_id)
-#     except: 
-#         abort(make_response({"message": f"book {book_id} was invalid"}, 400)) # using abort instead of return so it doesn't continue on with our code in specific_book, abort expects a respoonse object so we need to use make_response to return an object
-#     for book in books:
-#         if book.id == book_id:
-#             return book
-#     abort(make_response({"message": f"book {book_id} was not found"}, 404))
-
-
-# @books_bp.route("/<book_id>", methods=["GET"])
-# def specific_book(book_id):
-#     book = validate_book(book_id)
-
-#     return {
-#         "id": book.id,
-#         "title": book.title,
-#         "description": book.description
-#             }
-
-
-# @books_bp.route("", methods=["GET"])
-# def books_list():
-#     books_list = []
-#     for book in books:
-#         books_list.append({
-#             "id": book.id,
-#             "title": book.title,
-#             "description": book.description
-#         })
-#     return jsonify(books_list), 200 # makes a Response object, used when returning a list
-
+'''
+the following function will execute whenever a matching HTTP request is received
+We use the request object to get information about the HTTP request. We want to get the request's JSON body, so we use request.get_json(). This method "Pythonifies" the JSON HTTP request body by converting it to a Python dictionary.
+'''
+@books_bp.route("", methods=["POST"])
+def handle_books():
+    request_body = request.get_json()
+    #create an instance of Book
+    new_book = Book(title=request_body["title"],
+                    description=request_body["description"])
+    #the databases way of collecting changes that need to be made, here we are saying we want the database to add a new book and them commit the collected changes
+    db.session.add(new_book)
+    db.session.commit()
+    # we want to return a response object from Flask endpoint functions
+    return make_response(f"Book {new_book.title} successfully created", 201)
