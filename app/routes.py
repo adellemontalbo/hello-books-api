@@ -13,7 +13,7 @@ For a little more flexibility, we could choose to use "/" as the route path and 
 the following function will execute whenever a matching HTTP request is received
 We use the request object to get information about the HTTP request. We want to get the request's JSON body, so we use request.get_json(). This method "Pythonifies" the JSON HTTP request body by converting it to a Python dictionary.
 '''
-@books_bp.route("", methods=["GET"])
+@books_bp.route("", methods=["GET"]) #Here we are defining a route. This decorator (a decorator is a function that modifies another function) tells Python when to call this function
 def get_all_books():
     books = Book.query.all() # returns a list of book instances
     books_response = [{
