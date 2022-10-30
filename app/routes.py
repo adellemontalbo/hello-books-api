@@ -16,11 +16,7 @@ We use the request object to get information about the HTTP request. We want to 
 @books_bp.route("", methods=["GET"]) #Here we are defining a route. This decorator (a decorator is a function that modifies another function) tells Python when to call this function
 def get_all_books():
     books = Book.query.all() # returns a list of book instances
-    books_response = [{
-            "id": book.id,
-            "title": book.title,
-            "description": book.description
-        } for book in books]
+    books_response = [book.to_dict() for book in books]
     return jsonify(books_response), 200
 
 @books_bp.route("", methods=["POST"])
@@ -29,7 +25,7 @@ def post_book():
     #create an instance of Book
     new_book = Book(title=request_body["title"],
                     description=request_body["description"])
-    #the databases way of collecting changes that need to be made, here we are saying we want the database to add a new book and them commit the collected changes
+    #the database's way of collecting changes that need to be made, here we are saying we want the database to add a new book and then commit the collected changes
     db.session.add(new_book)
     db.session.commit()
     # we want to return a response object from Flask endpoint functions
