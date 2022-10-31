@@ -51,4 +51,16 @@ def post_book():
     # we want to return a response object from Flask endpoint functions
     return make_response(f"Book {new_book.title} successfully created", 201)
 
+@books_bp.route("/<book_id>", methods=["PUT"])
+def update_book(book_id):
+    book = validate_book(book_id)
+    request_body = request.get_json()
 
+    try:
+        book.title = request_body["title"]
+        book.description = request_body["description"]
+    except:
+        abort(make_response({f"message": "You must enter a title AND a description"}, 400))
+
+    db.session.commit()
+    return make_response(f"Book {book.id} successfully updated", 200)
