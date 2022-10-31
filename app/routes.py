@@ -30,7 +30,13 @@ def validate_book(book_id):
 
 @books_bp.route("", methods=["GET"]) #Here we are defining a route. This decorator (a decorator is a function that modifies another function) tells Python when to call this function
 def get_all_books():
-    books = Book.query.all() # returns a list of book instances
+    title_query = request.args.get("title")
+
+    if title_query:
+        books = Book.query.filter_by(title=title_query)
+    else:
+        books = Book.query.all() # returns a list of book instances
+    
     books_response = [book.to_dict() for book in books]
     return jsonify(books_response), 200
 
