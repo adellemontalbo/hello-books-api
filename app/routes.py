@@ -40,10 +40,12 @@ def get_all_books():
     books_response = [book.to_dict() for book in books]
     return jsonify(books_response), 200
 
+
 @books_bp.route("/<book_id>", methods=["GET"])
 def get_one_book(book_id):
     book = validate_book(book_id)
-    return book.to_dict()
+    return jsonify(book.to_dict()), 200
+
 
 @books_bp.route("", methods=["POST"])
 def post_book():
@@ -56,6 +58,7 @@ def post_book():
     db.session.commit()
     # we want to return a response object from Flask endpoint functions
     return make_response(f"Book {new_book.title} successfully created", 201)
+
 
 @books_bp.route("/<book_id>", methods=["PUT"])
 def update_book(book_id):
@@ -70,6 +73,7 @@ def update_book(book_id):
 
     db.session.commit()
     return make_response(f"Book {book.id} successfully updated", 200)
+    
 
 @books_bp.route("/<book_id>", methods=["DELETE"])
 def delete_book(book_id):
