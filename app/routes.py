@@ -13,37 +13,43 @@ For a little more flexibility, we could choose to use "/" as the route path and 
 the following function will execute whenever a matching HTTP request is received
 We use the request object to get information about the HTTP request. We want to get the request's JSON body, so we use request.get_json(). This method "Pythonifies" the JSON HTTP request body by converting it to a Python dictionary.
 '''
-#helper functions
-def validate_book(book_id):
+#helper functions - we can reuse this for multiple models
+def validate_model(cls, model_id):
     try:
-        book_id = int(book_id)
+        model_id = int(model_id)
     except:
-        abort(make_response({f"message": "Book {book_id} is invalid"}, 400))
+        abort(make_response({"message": f"{cls.__name__} {model_id} is invalid"}, 400))
 
-    book = Book.query.get(book_id)
+    model = cls.query.get(model_id)
    
-    if not book:
-        abort(make_response({f"message": "Book {book_id} does not exist"}, 404))
-    return book 
-
-
+    if not model:
+        abort(make_response({"message": f"{cls.__name__} {model_id} does not exist"}, 404))
+    return model
 
 @books_bp.route("", methods=["GET"]) #Here we are defining a route. This decorator (a decorator is a function that modifies another function) tells Python when to call this function
 def get_all_books():
-    title_query = request.args.get("title")
+    title_query = request.args.get("title") # we get None if not there
+    description_query = request.args.get("description")
+    limit_query = request.args.get("limit")
+
+    book_query = Book.query
 
     if title_query:
-        books = Book.query.filter_by(title=title_query)
-    else:
-        books = Book.query.all() # returns a list of book instances
-    
+        book_query = book_query.filter_by(title=title_query)
+    if description_query:
+        description_query = book_query.filter_by(description=description_query)
+    if limit_query:
+        book_query = book_query.filter_by(limit_query)
+
+    books = book_query.all()
+
     books_response = [book.to_dict() for book in books]
     return jsonify(books_response), 200
 
 
 @books_bp.route("/<book_id>", methods=["GET"])
 def get_one_book(book_id):
-    book = validate_book(book_id)
+    book = validate_model(Book, book_id)
     return jsonify(book.to_dict()), 200
 
 
@@ -51,8 +57,7 @@ def get_one_book(book_id):
 def post_book():
     request_body = request.get_json()
     #create an instance of Book
-    new_book = Book(title=request_body["title"],
-                    description=request_body["description"])
+    new_book = Book.from_dict(request_body)
     #the database's way of collecting changes that need to be made, here we are saying we want the database to add a new book and then commit the collected changes
     db.session.add(new_book)
     db.session.commit()
@@ -62,14 +67,11 @@ def post_book():
 
 @books_bp.route("/<book_id>", methods=["PUT"])
 def update_book(book_id):
-    book = validate_book(book_id)
+    book = validate_model(Book, book_id)
     request_body = request.get_json()
-
-    try:
-        book.title = request_body["title"]
-        book.description = request_body["description"]
-    except:
-        abort(make_response({f"message": "You must enter a title AND a description"}, 400))
+    
+    book.title = request_body["title"]
+    book.description = request_body["description"]
 
     db.session.commit()
     return make_response(f"Book {book.id} successfully updated", 200)
@@ -77,7 +79,7 @@ def update_book(book_id):
 
 @books_bp.route("/<book_id>", methods=["DELETE"])
 def delete_book(book_id):
-    book = validate_book(book_id)
+    book = validate_model(Book, book_id)
     db.session.delete(book)
     db.session.commit()
     return make_response(f"Book {book.id} successfully deleted", 200)

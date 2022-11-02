@@ -11,6 +11,11 @@ class Book(db.Model):
     title = db.Column(db.String)
     description = db.Column(db.String)
 
+    @classmethod #belongs to the class as a whole, not instance. cls is a variable that refers to a class object
+    def from_dict(cls, data_dict): #it passes in the class itself, not self (instance)
+        return cls(title=data_dict["title"],
+            description=data_dict["description"])
+
     def to_dict(self):
         return (dict(
             id=self.id,
