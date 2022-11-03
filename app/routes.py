@@ -62,7 +62,7 @@ def post_book():
     db.session.add(new_book)
     db.session.commit()
     # we want to return a response object from Flask endpoint functions
-    return make_response(jsonify((f"Book {new_book.title} successfully created", 201)))
+    return make_response(jsonify(f"Book {new_book.title} successfully created"), 201)
 
 
 @books_bp.route("/<book_id>", methods=["PUT"])
@@ -74,7 +74,7 @@ def update_book(book_id):
     book.description = request_body["description"]
 
     db.session.commit()
-    return make_response(f"Book {book.id} successfully updated", 200)
+    return make_response(jsonify(f"Book {book.id} successfully updated"), 200)
     
 
 @books_bp.route("/<book_id>", methods=["DELETE"])
@@ -82,5 +82,5 @@ def delete_book(book_id):
     book = validate_model(Book, book_id)
     db.session.delete(book)
     db.session.commit()
-    return make_response(f"Book {book.id} successfully deleted", 200)
+    return make_response(jsonify(f"Book {book.id} successfully deleted"), 200)
     
