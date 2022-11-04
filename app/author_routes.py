@@ -1,5 +1,5 @@
 from app import db
-from app.models.author import Author
+from app.models.author import Author, Book
 from flask import Blueprint, jsonify, make_response, request, abort
 
 authors_bp = Blueprint("authors", __name__, url_prefix="/authors")
@@ -37,10 +37,28 @@ def get_all_authors():
 @authors_bp.route("", methods=["POST"], strict_slashes=False)
 def create_author():
     request_body = request.get_json()
-    new_author = Author(name=request_body["name"])
+    new_author = Author.from_dict(request_body)
 
     db.session.add(new_author)
     db.session.commit()
 
     return make_response(jsonify(f"Author {new_author.name} successfully created"), 201)
 
+@authors_bp.route("/<author_id>/books", methods=["POST"], strict_slashes=False)
+def post_book_to_author(author_id):
+    author = validate_model(Author, author_id)
+
+    request_body = request.get_json()
+    new_book = Book.from_dict(request_body)
+    new_book.author = author
+
+    db.session.add(new_book)
+    db.session.commit()
+
+    return make_response(jsonify(f"Book {new_book.title} by {author.name} successfully created"), 201)
+
+@authors_bp.route("/<author_id>/books", methods=["GET"], strict_slashes=False) #Here we are defining a route. This decorator (a decorator is a function that modifies another function) tells Python when to call this function
+def get_all_books_from_one_author(author_id):
+    authors = validate_model(Author, author_id)
+    book_response = [book.to_dict() for book in authors.books]
+    return make_response(jsonify(book_response), 200)
