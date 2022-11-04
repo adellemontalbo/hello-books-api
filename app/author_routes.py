@@ -59,6 +59,6 @@ def post_book_to_author(author_id):
 
 @authors_bp.route("/<author_id>/books", methods=["GET"], strict_slashes=False) #Here we are defining a route. This decorator (a decorator is a function that modifies another function) tells Python when to call this function
 def get_all_books_from_one_author(author_id):
-    authors = validate_model(Author, author_id)
-    book_response = [book.to_dict() for book in authors.books]
+    author = validate_model(Author, author_id)
+    book_response = [book.to_dict() for book in author.books]
     return make_response(jsonify(book_response), 200)
