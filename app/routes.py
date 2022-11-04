@@ -5,6 +5,7 @@ from flask import Blueprint, jsonify, make_response, request, abort
 
 books_bp = Blueprint("books", __name__, url_prefix="/books")
 
+
 '''
 For a little more flexibility, we could choose to use "/" as the route path and include the keyword argument strict_slashes=False. This tells the route to treat a URI the same whether or not it ends in /. Accepting either variation can make using our API a little easier for our clients.
 '''
@@ -26,7 +27,7 @@ def validate_model(cls, model_id):
         abort(make_response({"message": f"{cls.__name__} {model_id} does not exist"}, 404))
     return model
 
-@books_bp.route("", methods=["GET"]) #Here we are defining a route. This decorator (a decorator is a function that modifies another function) tells Python when to call this function
+@books_bp.route("", methods=["GET"], strict_slashes=False) #Here we are defining a route. This decorator (a decorator is a function that modifies another function) tells Python when to call this function
 def get_all_books():
     title_query = request.args.get("title") # we get None if not there
     description_query = request.args.get("description")

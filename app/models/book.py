@@ -10,6 +10,8 @@ class Book(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     title = db.Column(db.String)
     description = db.Column(db.String)
+    author_id = db.Column(db.Integer, db.ForeignKey('author.id'))
+    author = db.relationship("Author", back_populates="books")
 
     @classmethod #belongs to the class as a whole, not instance. cls is a variable that refers to a class object
     def from_dict(cls, data_dict): #it passes in the class itself, not self (instance)

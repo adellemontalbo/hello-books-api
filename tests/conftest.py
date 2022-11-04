@@ -13,7 +13,7 @@ def app():
         db.session.remove()
 
     with app.app_context(): #within the context of our app, (which is looking at the test database), we want to use this context and generate a new start to our dtabase
-        db.create_all()
+        db.create_all() #creates all the schema?
         yield app
 
     with app.app_context():
